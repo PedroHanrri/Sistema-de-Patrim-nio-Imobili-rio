@@ -16,10 +16,9 @@ const pool = mysql.createPool({
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
     database: process.env.DB_NAME,
-    ssl: {
-        ca: process.env.DB_SSL_CERT,
-        rejectUnauthorized: true
-    },
+    ssl: process.env.DB_SSL_CERT
+        ? { ca: process.env.DB_SSL_CERT.replace(/\\n/g, '\n'), rejectUnauthorized: true }
+        : { rejectUnauthorized: false },
     waitForConnections: true,
     connectionLimit: 5,
     connectTimeout: 30000,
@@ -27,12 +26,14 @@ const pool = mysql.createPool({
 });
 
 // -------------------------------------------------------
-// Inicializar banco
+// Rota raiz — confirma que a API está online
 // -------------------------------------------------------
-
+app.get('/', (req, res) => {
+    res.json({ ok: true, message: 'API online' });
+});
 
 // -------------------------------------------------------
-// Ping
+// Ping — testa conexão com o banco
 // -------------------------------------------------------
 app.get('/api/ping', async (req, res) => {
     try {
