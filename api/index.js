@@ -32,32 +32,6 @@ app.get('/', (req, res) => {
     res.json({ ok: true, message: 'API online' });
 });
 
-
-async function initDB() {
-    try {
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS usuarios (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                nome VARCHAR(255) NOT NULL,
-                email VARCHAR(255) NOT NULL UNIQUE,
-                login VARCHAR(255) NOT NULL UNIQUE,
-                senha VARCHAR(255) NOT NULL,
-                perfil VARCHAR(100) DEFAULT 'Usuário',
-                criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        `);
-        await pool.query(`
-            ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS perfil VARCHAR(100) DEFAULT 'Usuário'
-        `).catch(() => {});
-
-        // As tabelas tblmovel e tblmovelTipo são gerenciadas pelo professor — não criamos aqui.
-        console.log('Tabelas verificadas/criadas com sucesso');
-    } catch (err) {
-        console.error('Erro ao criar tabelas:', err.message);
-    }
-}
-
-initDB();
 // -------------------------------------------------------
 // Ping — testa conexão com o banco
 // -------------------------------------------------------
@@ -79,13 +53,13 @@ app.post('/api/registrar', async (req, res) => {
         return res.status(400).json({ ok: false, error: 'Todos os campos são obrigatórios.' });
     try {
         const [existe] = await pool.query(
-            'SELECT usuario_id FROM seguranca.tbUsuarios WHERE login = ?', [login]
+            'SELECT usuario_id FROM `seguranca.tbUsuarios` WHERE login = ?', [login]
         );
         if (existe.length > 0)
             return res.status(409).json({ ok: false, error: 'Login já cadastrado.' });
 
         const [result] = await pool.query(
-            'INSERT INTO seguranca.tbUsuarios (nome, login, senha) VALUES (?, ?, ?)',
+            'INSERT INTO `seguranca.tbUsuarios` (nome, login, senha) VALUES (?, ?, ?)',
             [nome, login, senha]
         );
         res.json({ ok: true, usuario_id: result.insertId, message: 'Usuário criado com sucesso!' });
@@ -103,7 +77,7 @@ app.post('/api/login', async (req, res) => {
         return res.status(400).json({ ok: false, error: 'Login e senha são obrigatórios.' });
     try {
         const [rows] = await pool.query(
-            'SELECT usuario_id, nome, login FROM seguranca.tbUsuarios WHERE login = ? AND senha = ?',
+            'SELECT usuario_id, nome, login FROM `seguranca.tbUsuarios` WHERE login = ? AND senha = ?',
             [login, senha]
         );
         if (rows.length > 0) {
@@ -125,7 +99,7 @@ app.get('/api/imoveis', async (req, res) => {
             SELECT i.imovel_id, i.endereco, i.valor, i.area,
                    u.nome AS proprietario, t.descricao AS tipo
             FROM tbImovel i
-            JOIN seguranca_tbUsuarios u ON u.usuario_id = i.proprietario_id
+            JOIN `seguranca.tbUsuarios` u ON u.usuario_id = i.proprietario_id
             JOIN tbImovelTipo t         ON t.imovel_tipo_id = i.imovel_tipo_id
         `);
         res.json({ ok: true, data: rows });
@@ -142,7 +116,7 @@ app.get('/api/imoveis/:id', async (req, res) => {
         const [rows] = await pool.query(`
             SELECT i.*, u.nome AS proprietario, t.descricao AS tipo
             FROM tbImovel i
-            JOIN seguranca_tbUsuarios u ON u.usuario_id = i.proprietario_id
+            JOIN `seguranca.tbUsuarios` u ON u.usuario_id = i.proprietario_id
             JOIN tbImovelTipo t         ON t.imovel_tipo_id = i.imovel_tipo_id
             WHERE i.imovel_id = ?
         `, [req.params.id]);
