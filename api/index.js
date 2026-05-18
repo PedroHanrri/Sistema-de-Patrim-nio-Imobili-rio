@@ -125,7 +125,7 @@ app.get('/api/imoveis', async (req, res) => {
             SELECT i.imovel_id, i.endereco, i.valor, i.area,
                    u.nome AS proprietario, t.descricao AS tipo
             FROM tbImovel i
-            JOIN seguranca.tbUsuarios u ON u.usuario_id = i.proprietario_id
+            JOIN seguranca_tbUsuarios u ON u.usuario_id = i.proprietario_id
             JOIN tbImovelTipo t         ON t.imovel_tipo_id = i.imovel_tipo_id
         `);
         res.json({ ok: true, data: rows });
