@@ -250,16 +250,14 @@
   </div>
 
   <script>
-    /* ════════════════════════════════════════════════════════════
-       ⚙️  CONFIGURAÇÃO — cole aqui a URL do seu projeto no Vercel
-           Exemplo: 'https://projetohiran.vercel.app'
-       ════════════════════════════════════════════════════════════ */
-    const BASE_URL = 'https://sistema-de-patrim-nio-imobili-rio.vercel.app/'; // ← SUBSTITUA AQUI
+    /* ════════════════════════════════════════════════════════
+       URL base da API — Vercel
+       ════════════════════════════════════════════════════════ */
+    const BASE_URL = 'https://sistema-de-patrim-nio-imobili-rio.vercel.app';
 
-    /* As rotas abaixo já estão corretas conforme seu api/index.js */
     const ROTAS = {
-      cadastro : `${BASE_URL}/api/registrar`, // POST { nome, login, senha }
-      login    : `${BASE_URL}/api/login`,     // POST { login, senha }
+      cadastro : `${BASE_URL}/api/registrar`,
+      login    : `${BASE_URL}/api/login`,
     };
 
     /* ─── Utilitários ─── */
@@ -321,13 +319,12 @@
       txt.style.color       = n.cor;
     }
 
-    /* ════════════════════════════════════════════════════════════
-       CADASTRO
-       Rota: POST /api/registrar
-       Body: { nome, login, senha }
-       Retorno ok:    { ok: true, usuario_id, message }
-       Retorno erro:  { ok: false, error }
-       ════════════════════════════════════════════════════════════ */
+    /* ════════════════════════════════════════════════════════
+       CADASTRO → POST /api/registrar
+       Body:    { nome, login, senha }
+       Retorno: { ok: true, usuario_id, message }
+                { ok: false, error }
+       ════════════════════════════════════════════════════════ */
     async function fazerCadastro() {
       ocultarAlerta('alerta-cadastro');
       limparErros('cad-nome', 'cad-login', 'cad-senha', 'cad-confirmar');
@@ -337,12 +334,11 @@
       const senha     = document.getElementById('cad-senha').value;
       const confirmar = document.getElementById('cad-confirmar').value;
 
-      /* Validações no frontend */
-      if (!nome)           { marcarErro('cad-nome');      return mostrarAlerta('alerta-cadastro', 'erro', 'Informe o nome completo.'); }
-      if (!login)          { marcarErro('cad-login');     return mostrarAlerta('alerta-cadastro', 'erro', 'Informe um login.'); }
-      if (login.length < 3){ marcarErro('cad-login');     return mostrarAlerta('alerta-cadastro', 'erro', 'Login deve ter ao menos 3 caracteres.'); }
-      if (!senha)          { marcarErro('cad-senha');     return mostrarAlerta('alerta-cadastro', 'erro', 'Informe uma senha.'); }
-      if (senha.length < 6){ marcarErro('cad-senha');     return mostrarAlerta('alerta-cadastro', 'erro', 'Senha deve ter ao menos 6 caracteres.'); }
+      if (!nome)            { marcarErro('cad-nome');      return mostrarAlerta('alerta-cadastro', 'erro', 'Informe o nome completo.'); }
+      if (!login)           { marcarErro('cad-login');     return mostrarAlerta('alerta-cadastro', 'erro', 'Informe um login.'); }
+      if (login.length < 3) { marcarErro('cad-login');     return mostrarAlerta('alerta-cadastro', 'erro', 'Login deve ter ao menos 3 caracteres.'); }
+      if (!senha)           { marcarErro('cad-senha');     return mostrarAlerta('alerta-cadastro', 'erro', 'Informe uma senha.'); }
+      if (senha.length < 6) { marcarErro('cad-senha');     return mostrarAlerta('alerta-cadastro', 'erro', 'Senha deve ter ao menos 6 caracteres.'); }
       if (senha !== confirmar){ marcarErro('cad-confirmar'); return mostrarAlerta('alerta-cadastro', 'erro', 'As senhas não coincidem.'); }
 
       setCarregando('btn-cadastrar', true);
@@ -355,7 +351,6 @@
         const data = await res.json();
 
         if (!data.ok) {
-          /* Trata login duplicado (retornado pelo backend com status 409) */
           if (/login já cadastrado/i.test(data.error)) {
             marcarErro('cad-login');
             return mostrarAlerta('alerta-cadastro', 'erro', 'Este login já está em uso. Escolha outro.');
@@ -363,7 +358,6 @@
           return mostrarAlerta('alerta-cadastro', 'erro', data.error || 'Erro ao realizar cadastro.');
         }
 
-        /* Sucesso: preenche login e redireciona para aba de entrar */
         mostrarAlerta('alerta-cadastro', 'sucesso', 'Conta criada com sucesso! Redirecionando para o login...');
         setTimeout(() => {
           trocarAba('login');
@@ -373,19 +367,18 @@
 
       } catch (err) {
         console.error('[CADASTRO]', err);
-        mostrarAlerta('alerta-cadastro', 'erro', 'Não foi possível conectar ao servidor. Verifique a URL em BASE_URL.');
+        mostrarAlerta('alerta-cadastro', 'erro', 'Erro de conexão com o servidor. Tente novamente.');
       } finally {
         setCarregando('btn-cadastrar', false);
       }
     }
 
-    /* ════════════════════════════════════════════════════════════
-       LOGIN
-       Rota: POST /api/login
-       Body: { login, senha }
-       Retorno ok:    { ok: true, usuario_id, nome, login }
-       Retorno erro:  { ok: false, error }
-       ════════════════════════════════════════════════════════════ */
+    /* ════════════════════════════════════════════════════════
+       LOGIN → POST /api/login
+       Body:    { login, senha }
+       Retorno: { ok: true, usuario_id, nome, login }
+                { ok: false, error }
+       ════════════════════════════════════════════════════════ */
     async function fazerLogin() {
       ocultarAlerta('alerta-login');
       limparErros('login-usuario', 'login-senha');
@@ -411,20 +404,19 @@
           return mostrarAlerta('alerta-login', 'erro', data.error || 'Login ou senha incorretos.');
         }
 
-        /* Salva sessão com os dados do usuário retornados pela API */
-        const sessao = {
+        /* Salva sessão com dados retornados pela API */
+        sessionStorage.setItem('usuario', JSON.stringify({
           usuario_id: data.usuario_id,
           nome      : data.nome,
           login     : data.login,
-        };
-        sessionStorage.setItem('usuario', JSON.stringify(sessao));
+        }));
 
         mostrarAlerta('alerta-login', 'sucesso', `Bem-vindo, ${data.nome}! Entrando...`);
         setTimeout(() => { window.location.href = 'index.html'; }, 1500);
 
       } catch (err) {
         console.error('[LOGIN]', err);
-        mostrarAlerta('alerta-login', 'erro', 'Não foi possível conectar ao servidor. Verifique a URL em BASE_URL.');
+        mostrarAlerta('alerta-login', 'erro', 'Erro de conexão com o servidor. Tente novamente.');
       } finally {
         setCarregando('btn-entrar', false);
       }
