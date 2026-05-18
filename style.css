@@ -1,0 +1,164 @@
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+font-family:'Montserrat',sans-serif;
+background:#f5f5f5;
+color:#333;
+}
+
+/* NAVBAR */
+
+.topo{
+position:fixed;
+top:20px;
+left:50%;
+transform:translateX(-50%);
+width:85%;
+background:white;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:15px 40px;
+border-radius:40px;
+box-shadow:0 10px 30px rgba(0,0,0,0.1);
+z-index:10;
+}
+
+.titulo{
+font-family:'Merriweather',serif;
+font-size:20px;
+color:#333;
+}
+
+.titulo span{
+color:#c89a63;
+}
+
+.menu{
+display:flex;
+list-style:none;
+gap:25px;
+}
+
+.menu a{
+text-decoration:none;
+color:#444;
+font-weight:500;
+padding:8px 14px;
+border-radius:20px;
+transition:0.3s;
+}
+
+.menu a:hover{
+background:#c89a63;
+color:white;
+}
+
+/* HERO */
+
+.hero{
+height:90vh;
+display:flex;
+align-items:center;
+justify-content:center;
+position:relative;
+overflow:hidden;
+margin-top:80px;
+}
+
+/* imagem estilo parallax */
+
+.hero img{
+position:absolute;
+width:120%;
+height:120%;
+object-fit:cover;
+top:-10%;
+left:-10%;
+filter:brightness(0.75);
+}
+
+/* camada clara */
+
+.escurecer{
+position:absolute;
+width:100%;
+height:100%;
+background:linear-gradient(
+to right,
+rgba(0,0,0,0.6),
+rgba(0,0,0,0.2)
+);
+}
+
+/* TEXTO */
+
+.hero-conteudo{
+position:relative;
+max-width:700px;
+text-align:left;
+color:white;
+padding:40px;
+animation:fade 1.2s ease;
+}
+
+.hero-conteudo h2{
+font-family:'Merriweather',serif;
+font-size:48px;
+margin-bottom:20px;
+}
+
+.hero-conteudo p{
+font-size:18px;
+margin-bottom:35px;
+color:#e6e6e6;
+}
+
+/* BOTÃO */
+
+.botao{
+display:inline-block;
+padding:14px 34px;
+background:#c89a63;
+color:white;
+text-decoration:none;
+border-radius:30px;
+font-weight:600;
+transition:0.3s;
+box-shadow:0 8px 20px rgba(0,0,0,0.25);
+}
+
+.botao:hover{
+background:#b28452;
+transform:translateY(-3px);
+}
+
+/* FOOTER */
+
+.rodape{
+padding:25px;
+text-align:center;
+background:#2b1f15;
+color:#e8e0d8;
+font-size:14px;
+}
+
+/* ANIMAÇÃO */
+
+@keyframes fade{
+
+from{
+opacity:0;
+transform:translateY(40px);
+}
+
+to{
+opacity:1;
+transform:translateY(0);
+}
+
+}
