@@ -142,7 +142,7 @@ app.get('/api/imoveis/:id', async (req, res) => {
         const [rows] = await pool.query(`
             SELECT i.*, u.nome AS proprietario, t.descricao AS tipo
             FROM tbImovel i
-            JOIN seguranca.tbUsuarios u ON u.usuario_id = i.proprietario_id
+            JOIN seguranca_tbUsuarios u ON u.usuario_id = i.proprietario_id
             JOIN tbImovelTipo t         ON t.imovel_tipo_id = i.imovel_tipo_id
             WHERE i.imovel_id = ?
         `, [req.params.id]);
