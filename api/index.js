@@ -16,9 +16,7 @@ const pool = mysql.createPool({
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
     database: process.env.DB_NAME,
-    ssl: {
-        rejectUnauthorized: false
-    },
+    ssl: { rejectUnauthorized: false },
     waitForConnections: true,
     connectionLimit: 5,
     connectTimeout: 30000,
@@ -26,19 +24,47 @@ const pool = mysql.createPool({
 });
 
 // -------------------------------------------------------
-// Rota raiz — confirma que a API está online
+// Rota raiz
 // -------------------------------------------------------
-app.get('/', (req, res) => {
-    res.json({ ok: true, message: 'API online' });
-});
+app.get('/', (req, res) => res.json({ ok: true, message: 'API online' }));
 
 // -------------------------------------------------------
-// Ping — testa conexão com o banco
+// Ping
 // -------------------------------------------------------
 app.get('/api/ping', async (req, res) => {
     try {
         const [rows] = await pool.query('SELECT 1 as ok');
         res.json({ ok: true, db: rows[0] });
+    } catch (err) {
+        res.status(500).json({ ok: false, error: err.message });
+    }
+});
+
+// -------------------------------------------------------
+// USUÁRIOS — Listar todos
+// -------------------------------------------------------
+app.get('/api/usuarios', async (req, res) => {
+    try {
+        const [rows] = await pool.query(
+            'SELECT usuario_id, nome, login, atualizado_em FROM seguranca.tbUsuarios ORDER BY usuario_id'
+        );
+        res.json({ ok: true, data: rows });
+    } catch (err) {
+        res.status(500).json({ ok: false, error: err.message });
+    }
+});
+
+// -------------------------------------------------------
+// USUÁRIOS — Buscar por ID
+// -------------------------------------------------------
+app.get('/api/usuarios/:id', async (req, res) => {
+    try {
+        const [rows] = await pool.query(
+            'SELECT usuario_id, nome, login, atualizado_em FROM seguranca.tbUsuarios WHERE usuario_id = ?',
+            [req.params.id]
+        );
+        if (!rows.length) return res.status(404).json({ ok: false, error: 'Usuário não encontrado.' });
+        res.json({ ok: true, data: rows[0] });
     } catch (err) {
         res.status(500).json({ ok: false, error: err.message });
     }
@@ -63,6 +89,43 @@ app.post('/api/registrar', async (req, res) => {
             [nome, login, senha]
         );
         res.json({ ok: true, usuario_id: result.insertId, message: 'Usuário criado com sucesso!' });
+    } catch (err) {
+        res.status(500).json({ ok: false, error: err.message });
+    }
+});
+
+// -------------------------------------------------------
+// USUÁRIOS — Atualizar
+// -------------------------------------------------------
+app.put('/api/usuarios/:id', async (req, res) => {
+    const { nome, login, senha } = req.body;
+    if (!nome || !login)
+        return res.status(400).json({ ok: false, error: 'Nome e login são obrigatórios.' });
+    try {
+        if (senha) {
+            await pool.query(
+                'UPDATE seguranca.tbUsuarios SET nome=?, login=?, senha=? WHERE usuario_id=?',
+                [nome, login, senha, req.params.id]
+            );
+        } else {
+            await pool.query(
+                'UPDATE seguranca.tbUsuarios SET nome=?, login=? WHERE usuario_id=?',
+                [nome, login, req.params.id]
+            );
+        }
+        res.json({ ok: true, message: 'Usuário atualizado com sucesso!' });
+    } catch (err) {
+        res.status(500).json({ ok: false, error: err.message });
+    }
+});
+
+// -------------------------------------------------------
+// USUÁRIOS — Excluir
+// -------------------------------------------------------
+app.delete('/api/usuarios/:id', async (req, res) => {
+    try {
+        await pool.query('DELETE FROM seguranca.tbUsuarios WHERE usuario_id = ?', [req.params.id]);
+        res.json({ ok: true, message: 'Usuário removido com sucesso!' });
     } catch (err) {
         res.status(500).json({ ok: false, error: err.message });
     }
@@ -97,10 +160,12 @@ app.get('/api/imoveis', async (req, res) => {
     try {
         const [rows] = await pool.query(`
             SELECT i.imovel_id, i.endereco, i.valor, i.area,
-                   u.nome AS proprietario, t.descricao AS tipo
+                   u.nome AS proprietario, t.descricao AS tipo,
+                   i.proprietario_id, i.imovel_tipo_id, i.atualizado_em
             FROM tbImovel i
             JOIN seguranca.tbUsuarios u ON u.usuario_id = i.proprietario_id
             JOIN tbImovelTipo t         ON t.imovel_tipo_id = i.imovel_tipo_id
+            ORDER BY i.imovel_id
         `);
         res.json({ ok: true, data: rows });
     } catch (err) {
@@ -120,8 +185,7 @@ app.get('/api/imoveis/:id', async (req, res) => {
             JOIN tbImovelTipo t         ON t.imovel_tipo_id = i.imovel_tipo_id
             WHERE i.imovel_id = ?
         `, [req.params.id]);
-        if (rows.length === 0)
-            return res.status(404).json({ ok: false, error: 'Imóvel não encontrado.' });
+        if (!rows.length) return res.status(404).json({ ok: false, error: 'Imóvel não encontrado.' });
         res.json({ ok: true, data: rows[0] });
     } catch (err) {
         res.status(500).json({ ok: false, error: err.message });
@@ -171,6 +235,92 @@ app.delete('/api/imoveis/:id', async (req, res) => {
     try {
         await pool.query('DELETE FROM tbImovel WHERE imovel_id = ?', [req.params.id]);
         res.json({ ok: true, message: 'Imóvel removido com sucesso!' });
+    } catch (err) {
+        res.status(500).json({ ok: false, error: err.message });
+    }
+});
+
+// -------------------------------------------------------
+// SERVIÇOS — Listar todos
+// -------------------------------------------------------
+app.get('/api/servicos', async (req, res) => {
+    try {
+        const [rows] = await pool.query(`
+            SELECT s.servico_id, s.descricao, s.valor,
+                   t.descricao AS tipo_nome, s.servico_tipo_id, s.atualizado_em
+            FROM tbServicos s
+            JOIN tbServicoTipo t ON t.servico_tipo_id = s.servico_tipo_id
+            ORDER BY s.servico_id
+        `);
+        res.json({ ok: true, data: rows });
+    } catch (err) {
+        res.status(500).json({ ok: false, error: err.message });
+    }
+});
+
+// -------------------------------------------------------
+// SERVIÇOS — Buscar por ID
+// -------------------------------------------------------
+app.get('/api/servicos/:id', async (req, res) => {
+    try {
+        const [rows] = await pool.query(`
+            SELECT s.*, t.descricao AS tipo_nome
+            FROM tbServicos s
+            JOIN tbServicoTipo t ON t.servico_tipo_id = s.servico_tipo_id
+            WHERE s.servico_id = ?
+        `, [req.params.id]);
+        if (!rows.length) return res.status(404).json({ ok: false, error: 'Serviço não encontrado.' });
+        res.json({ ok: true, data: rows[0] });
+    } catch (err) {
+        res.status(500).json({ ok: false, error: err.message });
+    }
+});
+
+// -------------------------------------------------------
+// SERVIÇOS — Cadastrar
+// -------------------------------------------------------
+app.post('/api/servicos', async (req, res) => {
+    const { descricao, valor, servico_tipo_id, atualizado_por } = req.body;
+    if (!descricao || !valor || !servico_tipo_id)
+        return res.status(400).json({ ok: false, error: 'Campos obrigatórios faltando.' });
+    try {
+        const [result] = await pool.query(
+            `INSERT INTO tbServicos (descricao, valor, servico_tipo_id, atualizado_por)
+             VALUES (?, ?, ?, ?)`,
+            [descricao, valor, servico_tipo_id, atualizado_por || null]
+        );
+        res.json({ ok: true, servico_id: result.insertId, message: 'Serviço cadastrado com sucesso!' });
+    } catch (err) {
+        res.status(500).json({ ok: false, error: err.message });
+    }
+});
+
+// -------------------------------------------------------
+// SERVIÇOS — Atualizar
+// -------------------------------------------------------
+app.put('/api/servicos/:id', async (req, res) => {
+    const { descricao, valor, servico_tipo_id, atualizado_por } = req.body;
+    if (!descricao || !valor || !servico_tipo_id)
+        return res.status(400).json({ ok: false, error: 'Campos obrigatórios faltando.' });
+    try {
+        await pool.query(
+            `UPDATE tbServicos SET descricao=?, valor=?, servico_tipo_id=?, atualizado_por=?
+             WHERE servico_id=?`,
+            [descricao, valor, servico_tipo_id, atualizado_por || null, req.params.id]
+        );
+        res.json({ ok: true, message: 'Serviço atualizado com sucesso!' });
+    } catch (err) {
+        res.status(500).json({ ok: false, error: err.message });
+    }
+});
+
+// -------------------------------------------------------
+// SERVIÇOS — Deletar
+// -------------------------------------------------------
+app.delete('/api/servicos/:id', async (req, res) => {
+    try {
+        await pool.query('DELETE FROM tbServicos WHERE servico_id = ?', [req.params.id]);
+        res.json({ ok: true, message: 'Serviço removido com sucesso!' });
     } catch (err) {
         res.status(500).json({ ok: false, error: err.message });
     }
@@ -236,5 +386,4 @@ app.get('/api/servico-tipos', async (req, res) => {
     }
 });
 
-// Vercel não usa app.listen()
 module.exports = app;

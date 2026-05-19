@@ -159,8 +159,9 @@
     <h1 class="titulo">Sistema <span>Imobiliário</span></h1>
     <ul class="menu">
       <li><a href="index.html">Inicio</a></li>
-      <li><a href="#">Lista</a></li>
-      <li><a href="#">Adicionar</a></li>
+      <li><a href="#">Usuarios</a></li>
+      <li><a href="#">Serviços</a></li>
+      <li><a href="#">Imóveis</a></li>
     </ul>
   </header>
 
@@ -412,7 +413,7 @@
         }));
 
         mostrarAlerta('alerta-login', 'sucesso', `Bem-vindo, ${data.nome}! Entrando...`);
-        setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+        setTimeout(() => { window.location.href = 'usuarios.html'; }, 1500);
 
       } catch (err) {
         console.error('[LOGIN]', err);

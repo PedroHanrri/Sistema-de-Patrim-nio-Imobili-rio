@@ -1,31 +1,16 @@
 {
   "version": 2,
   "builds": [
-    {
-      "src": "api/index.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "*.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "*.css",
-      "use": "@vercel/static"
-    }
+    { "src": "api/index.js", "use": "@vercel/node" },
+    { "src": "*.html",       "use": "@vercel/static" },
+    { "src": "*.css",        "use": "@vercel/static" }
   ],
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "api/index.js"
-    },
-    {
-      "src": "/login",
-      "dest": "login.html"
-    },
-    {
-      "src": "/",
-      "dest": "index.html"
-    }
+    { "src": "/api/(.*)",   "dest": "api/index.js" },
+    { "src": "/login",      "dest": "login.html" },
+    { "src": "/usuarios",   "dest": "usuarios.html" },
+    { "src": "/servicos",   "dest": "servicos.html" },
+    { "src": "/imoveis",    "dest": "imoveis.html" },
+    { "src": "/",           "dest": "index.html" }
   ]
 }

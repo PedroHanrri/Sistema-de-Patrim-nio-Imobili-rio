@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Serviços — Sistema Imobiliário</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #b28452;
+      --primary-dark: #0D47A1;
+      --primary-light: #E3F2FD;
+      --danger: #D32F2F;
+      --warning: #F57C00;
+      --success: #388E3C;
+      --text: #212121;
+      --text-secondary: #616161;
+      --border: #E0E0E0;
+      --bg: #F5F7FA;
+      --white: #FFFFFF;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.14);
+      --radius: 8px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    nav {
+      background: var(--primary);
+      padding: 0 32px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-md);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-brand { font-size: 18px; font-weight: 700; color: white; letter-spacing: 0.5px; }
+    .nav-links { display: flex; gap: 4px; list-style: none; }
+    .nav-links a {
+      color: rgba(255,255,255,0.85); text-decoration: none;
+      font-size: 14px; font-weight: 500; padding: 6px 14px;
+      border-radius: 20px; transition: all 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active { background: rgba(255,255,255,0.18); color: white; }
+    .nav-right { display: flex; gap: 16px; align-items: center; }
+    .nav-right a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 13px; font-weight: 500; }
+    .nav-right a:hover { color: white; }
+
+    main {
+      flex: 1; padding: 32px;
+      max-width: 1200px; width: 100%; margin: 0 auto;
+    }
+
+    .page-card {
+      background: var(--white); border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); padding: 28px 32px;
+    }
+    .page-title { font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 20px; }
+
+    .action-bar {
+      display: flex; gap: 8px; margin-bottom: 20px;
+      flex-wrap: wrap; align-items: center;
+    }
+
+    .btn {
+      padding: 8px 18px; border: none; border-radius: 5px;
+      font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn-primary   { background: var(--primary-dark); color: white; }
+    .btn-warning   { background: #2196F3; color: white; }
+    .btn-danger    { background: var(--danger); color: white; }
+    .btn-secondary { background: #546E7A; color: white; }
+    .btn-success   { background: var(--success); color: white; }
+    .btn-cancel    { background: var(--bg); color: var(--text-secondary); border: 1.5px solid var(--border); }
+    .btn-cancel:hover { background: var(--border); }
+
+    .search-bar { display: flex; gap: 8px; margin-left: auto; }
+    .search-bar input {
+      padding: 7px 12px; border: 1.5px solid var(--border);
+      border-radius: 5px; font-family: 'Inter', sans-serif;
+      font-size: 13px; width: 160px; outline: none; transition: border-color 0.2s;
+    }
+    .search-bar input:focus { border-color: var(--primary); }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    thead tr { background: #DDEEFF; }
+    thead th {
+      padding: 11px 14px; text-align: left;
+      font-weight: 600; color: var(--text); font-size: 13px;
+    }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    tbody tr:hover { background: #F0F7FF; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody td { padding: 11px 14px; color: var(--text-secondary); }
+    tbody td:first-child { color: var(--text); }
+
+    input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--primary); cursor: pointer; }
+
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45); z-index: 200;
+      align-items: center; justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--white); border-radius: 10px; padding: 32px;
+      width: 100%; max-width: 480px;
+      box-shadow: var(--shadow-lg); animation: slideUp 0.25s ease;
+    }
+    .modal-title {
+      font-size: 17px; font-weight: 700; margin-bottom: 22px;
+      color: var(--text); border-bottom: 2px solid var(--primary-light);
+      padding-bottom: 12px;
+    }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block; font-size: 12px; font-weight: 600;
+      color: var(--text-secondary); text-transform: uppercase;
+      letter-spacing: 0.05em; margin-bottom: 6px;
+    }
+    .form-group input, .form-group select {
+      width: 100%; padding: 10px 12px;
+      border: 1.5px solid var(--border); border-radius: 6px;
+      font-family: 'Inter', sans-serif; font-size: 14px;
+      color: var(--text); background: #FAFAFA; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(21,101,192,0.1);
+      background: white;
+    }
+
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+
+    .confirm-modal { max-width: 380px; text-align: center; }
+    .confirm-icon { font-size: 40px; margin-bottom: 12px; }
+    .confirm-modal p { color: var(--text-secondary); font-size: 14px; margin-bottom: 4px; }
+    .confirm-modal strong { color: var(--text); font-size: 15px; }
+
+    .toast-container {
+      position: fixed; bottom: 24px; right: 24px;
+      z-index: 999; display: flex; flex-direction: column; gap: 8px;
+    }
+    .toast {
+      background: var(--text); color: white; padding: 12px 18px;
+      border-radius: 8px; font-size: 13px; font-weight: 500;
+      box-shadow: var(--shadow-lg); animation: toastIn 0.3s ease;
+      display: flex; align-items: center; gap: 8px; min-width: 220px;
+    }
+    .toast.success { background: var(--success); }
+    .toast.error   { background: var(--danger); }
+
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+    }
+    .badge-tipo { background: #E8F5E9; color: #2E7D32; }
+
+    .empty-state { text-align: center; padding: 48px 20px; color: var(--text-secondary); }
+    .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+    .spinner {
+      width: 32px; height: 32px; border: 3px solid var(--border);
+      border-top-color: var(--primary); border-radius: 50%;
+      animation: spin 0.7s linear infinite; margin: 40px auto;
+    }
+
+    .currency { color: #2E7D32; font-weight: 600; }
+
+    footer {
+      background: var(--primary); color: rgba(255,255,255,0.8);
+      text-align: center; padding: 16px; font-size: 13px; margin-top: auto;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <span class="nav-brand">Sistema Imobiliário</span>
+    <ul class="nav-links">
+      <li><a href="index.html">Início</a></li>
+      <li><a href="usuarios.html">Usuarios</a></li>
+      <li><a href="servicos.html" class="active">Serviços</a></li>
+      <li><a href="imoveis.html">Imóveis</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="login.html">Sair</a>
+    </div>
+  </nav>
+
+  <main>
+    <div class="page-card">
+      <h1 class="page-title">Serviços - Listar</h1>
+
+      <div class="action-bar">
+        <button class="btn btn-primary" onclick="abrirModalIncluir()">&#43; Incluir</button>
+        <button class="btn btn-warning" onclick="editarSelecionado()">✏ Editar</button>
+        <button class="btn btn-danger"  onclick="excluirSelecionado()">✕ Excluir</button>
+        <button class="btn btn-secondary" onclick="window.print()">🖨 Imprimir</button>
+        <div class="search-bar">
+          <input type="number" id="busca-id" placeholder="Buscar por ID..." min="1">
+          <button class="btn btn-success" onclick="buscarPorId()">🔍 Buscar</button>
+          <button class="btn btn-secondary" onclick="carregarServicos()">↺ Todos</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div id="loading" class="spinner"></div>
+        <table id="tabela" style="display:none">
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="chk-all" onchange="toggleAll(this)"></th>
+              <th>ID</th>
+              <th>Descrição</th>
+              <th>Valor (R$)</th>
+              <th>Tipo</th>
+              <th>Atualizado em</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-body"></tbody>
+        </table>
+        <div id="empty-state" class="empty-state" style="display:none">
+          <div class="icon">🔧</div>
+          <p>Nenhum serviço encontrado.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>© 2025 Sistema Imobiliário - Todos os direitos reservados</footer>
+
+  <!-- MODAL INCLUIR/EDITAR -->
+  <div class="modal-overlay" id="modal-form">
+    <div class="modal">
+      <h2 class="modal-title" id="modal-form-title">Incluir Serviço</h2>
+      <input type="hidden" id="form-id">
+      <div class="form-group">
+        <label>Descrição</label>
+        <input type="text" id="form-descricao" placeholder="Ex: Avaliação de imóvel">
+      </div>
+      <div class="form-group">
+        <label>Valor (R$)</label>
+        <input type="number" id="form-valor" placeholder="0.00" step="0.01" min="0">
+      </div>
+      <div class="form-group">
+        <label>Tipo de Serviço</label>
+        <select id="form-tipo">
+          <option value="">Carregando...</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-cancel" onclick="fecharModal('modal-form')">Cancelar</button>
+        <button class="btn btn-primary" onclick="salvarServico()">💾 Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CONFIRMAR EXCLUSÃO -->
+  <div class="modal-overlay" id="modal-confirmar">
+    <div class="modal confirm-modal">
+      <div class="confirm-icon">⚠️</div>
+      <strong id="confirm-msg">Excluir serviço selecionado?</strong>
+      <p>Esta ação não poderá ser desfeita.</p>
+      <div class="modal-actions" style="justify-content:center; margin-top:20px;">
+        <button class="btn btn-cancel" onclick="fecharModal('modal-confirmar')">Cancelar</button>
+        <button class="btn btn-danger" onclick="confirmarExclusao()">🗑 Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toasts"></div>
+
+  <script>
+    const BASE_URL = 'https://sistema-de-patrim-nio-imobili-rio.vercel.app';
+
+    let servicos = [];
+    let tiposServico = [];
+    let selecionados = [];
+    let idParaExcluir = null;
+
+    // ─── INIT ───
+    window.onload = async () => {
+      await carregarTipos();
+      await carregarServicos();
+    };
+
+    // ─── TIPOS ───
+    async function carregarTipos() {
+      try {
+        const res = await fetch(`${BASE_URL}/api/servico-tipos`);
+        const data = await res.json();
+        if (data.ok) tiposServico = data.data;
+      } catch(e) {
+        tiposServico = [
+          { servico_tipo_id: 1, descricao: 'Avaliação' },
+          { servico_tipo_id: 2, descricao: 'Vistoria' },
+          { servico_tipo_id: 3, descricao: 'Consultoria' },
+        ];
+      }
+      popularSelectTipo();
+    }
+
+    function popularSelectTipo() {
+      const sel = document.getElementById('form-tipo');
+      sel.innerHTML = tiposServico.map(t =>
+        `<option value="${t.servico_tipo_id}">${t.descricao}</option>`
+      ).join('');
+    }
+
+    // ─── CARREGAR SERVIÇOS ───
+    async function carregarServicos(lista) {
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('tabela').style.display = 'none';
+
+      if (!lista) {
+        try {
+          // A API não tem GET /servicos — usamos dados locais/mockados
+          if (!servicos.length) {
+            servicos = [
+              { servico_id: 1, descricao: 'Avaliação de Imóvel', valor: 850.00, servico_tipo_id: 1, tipo_nome: 'Avaliação', atualizado_em: '2025-03-10' },
+              { servico_id: 2, descricao: 'Vistoria Predial',    valor: 1200.00, servico_tipo_id: 2, tipo_nome: 'Vistoria',  atualizado_em: '2025-04-05' },
+              { servico_id: 3, descricao: 'Consultoria Jurídica',valor: 600.00, servico_tipo_id: 3, tipo_nome: 'Consultoria',atualizado_em: '2025-04-18' },
+            ];
+          }
+          lista = servicos;
+        } catch(e) { lista = servicos; }
+      }
+
+      document.getElementById('loading').style.display = 'none';
+      const tabela = document.getElementById('tabela');
+      const empty  = document.getElementById('empty-state');
+
+      if (!lista.length) {
+        tabela.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+      }
+
+      tabela.style.display = 'table';
+      empty.style.display  = 'none';
+      selecionados = [];
+
+      const tbody = document.getElementById('tabela-body');
+      tbody.innerHTML = lista.map(s => `
+        <tr>
+          <td><input type="checkbox" class="row-chk" value="${s.servico_id}" onchange="toggleRow(this)"></td>
+          <td>${s.servico_id}</td>
+          <td>${s.descricao}</td>
+          <td class="currency">R$ ${parseFloat(s.valor).toFixed(2).replace('.',',')}</td>
+          <td><span class="badge badge-tipo">${s.tipo_nome || 'N/A'}</span></td>
+          <td>${s.atualizado_em ? s.atualizado_em.substring(0,10) : '—'}</td>
+        </tr>
+      `).join('');
+    }
+
+    // ─── SELEÇÃO ───
+    function toggleAll(chk) {
+      document.querySelectorAll('.row-chk').forEach(c => { c.checked = chk.checked; toggleRow(c); });
+    }
+    function toggleRow(chk) {
+      const id = parseInt(chk.value);
+      if (chk.checked) { if (!selecionados.includes(id)) selecionados.push(id); }
+      else { selecionados = selecionados.filter(i => i !== id); }
+    }
+
+    // ─── BUSCAR ───
+    function buscarPorId() {
+      const id = parseInt(document.getElementById('busca-id').value);
+      if (!id) { toast('Informe um ID para buscar.', 'error'); return; }
+      const s = servicos.find(x => x.servico_id === id);
+      if (!s) { toast(`Serviço ID ${id} não encontrado.`, 'error'); return; }
+      carregarServicos([s]);
+    }
+
+    // ─── INCLUIR ───
+    function abrirModalIncluir() {
+      document.getElementById('modal-form-title').textContent = 'Incluir Serviço';
+      document.getElementById('form-id').value       = '';
+      document.getElementById('form-descricao').value= '';
+      document.getElementById('form-valor').value    = '';
+      popularSelectTipo();
+      abrirModal('modal-form');
+    }
+
+    // ─── EDITAR ───
+    function editarSelecionado() {
+      if (selecionados.length !== 1) { toast('Selecione exatamente 1 serviço para editar.', 'error'); return; }
+      const s = servicos.find(x => x.servico_id === selecionados[0]);
+      if (!s) return;
+      document.getElementById('modal-form-title').textContent = 'Editar Serviço';
+      document.getElementById('form-id').value        = s.servico_id;
+      document.getElementById('form-descricao').value = s.descricao;
+      document.getElementById('form-valor').value     = s.valor;
+      popularSelectTipo();
+      document.getElementById('form-tipo').value = s.servico_tipo_id;
+      abrirModal('modal-form');
+    }
+
+    // ─── SALVAR ───
+    async function salvarServico() {
+      const id        = document.getElementById('form-id').value;
+      const descricao = document.getElementById('form-descricao').value.trim();
+      const valor     = parseFloat(document.getElementById('form-valor').value);
+      const tipoId    = parseInt(document.getElementById('form-tipo').value);
+      const tipoNome  = tiposServico.find(t => t.servico_tipo_id === tipoId)?.descricao || 'N/A';
+      const hoje      = new Date().toISOString().substring(0,10);
+
+      if (!descricao) { toast('Descrição é obrigatória.', 'error'); return; }
+      if (isNaN(valor) || valor < 0) { toast('Informe um valor válido.', 'error'); return; }
+
+      if (!id) {
+        const novoId = servicos.length ? Math.max(...servicos.map(s => s.servico_id)) + 1 : 1;
+        servicos.push({ servico_id: novoId, descricao, valor, servico_tipo_id: tipoId, tipo_nome: tipoNome, atualizado_em: hoje });
+        toast('Serviço cadastrado com sucesso!', 'success');
+      } else {
+        const idx = servicos.findIndex(x => x.servico_id === parseInt(id));
+        if (idx >= 0) servicos[idx] = { ...servicos[idx], descricao, valor, servico_tipo_id: tipoId, tipo_nome: tipoNome, atualizado_em: hoje };
+        toast('Serviço atualizado com sucesso!', 'success');
+      }
+
+      fecharModal('modal-form');
+      carregarServicos();
+    }
+
+    // ─── EXCLUIR ───
+    function excluirSelecionado() {
+      if (!selecionados.length) { toast('Selecione ao menos 1 serviço para excluir.', 'error'); return; }
+      idParaExcluir = [...selecionados];
+      const qtd = idParaExcluir.length;
+      document.getElementById('confirm-msg').textContent =
+        `Excluir ${qtd} serviço${qtd > 1 ? 's' : ''} selecionado${qtd > 1 ? 's' : ''}?`;
+      abrirModal('modal-confirmar');
+    }
+
+    function confirmarExclusao() {
+      servicos = servicos.filter(s => !idParaExcluir.includes(s.servico_id));
+      fecharModal('modal-confirmar');
+      carregarServicos();
+      toast(`${idParaExcluir.length} serviço(s) excluído(s).`, 'success');
+      idParaExcluir = null;
+    }
+
+    // ─── UTILS ───
+    function abrirModal(id)  { document.getElementById(id).classList.add('open'); }
+    function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    function toast(msg, tipo = 'info') {
+      const c = document.getElementById('toasts');
+      const t = document.createElement('div');
+      t.className = `toast ${tipo}`;
+      t.textContent = msg;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3200);
+    }
+
+    document.querySelectorAll('.modal-overlay').forEach(el => {
+      el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+    });
+  </script>
+</body>
+</html>
